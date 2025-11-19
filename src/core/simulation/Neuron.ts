@@ -1,6 +1,6 @@
 // Neuron class implementing Leaky-Integrate-and-Fire model
 
-import type { SynapseConnection } from './types';
+import type { SynapseConnection, SynapseType } from './types';
 
 export class Neuron {
     public id: string;
@@ -21,7 +21,7 @@ export class Neuron {
         // TODO: Implement leak, fire, and propagation logic
     }
 
-    public addConnection(targetId: string, weight: number): void {
-        this.connections.push({ targetId, weight });
+    public addConnection(target: Neuron, weight: number, type: SynapseType): void {
+        this.connections.push({ target, weight, type });
     }
 }

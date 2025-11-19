@@ -1,5 +1,7 @@
 // Core types for the simulation engine
 
+import type { Neuron } from './Neuron';
+
 export interface NeuronState {
     id: string;
     voltage: number;
@@ -7,7 +9,13 @@ export interface NeuronState {
     refractoryTimer: number;
 }
 
+export enum SynapseType {
+    Chemical = 'chemical',
+    Electrical = 'electrical'
+}
+
 export interface SynapseConnection {
-    targetId: string;
+    target: Neuron;
     weight: number;
+    type: SynapseType;
 }
