@@ -1,4 +1,4 @@
-# Interactive Connectome Dynamics Simulator (ICDS)
+# (WIP) Interactive Connectome Dynamics Simulator (ICDS)
 
 An interactive, web-based 3D visualization tool for simulating and displaying real-time neural activity on connectomes.
 
