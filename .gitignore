@@ -23,3 +23,8 @@ npm-debug.log*
 
 # Test coverage
 coverage/
+checklist.md
+Worm_Neuro_Atlas_demo.ipynb
+WormNeuroAtlasCodemap.md
+src/ui/MockDesign/code.html
+src/ui/MockDesign/screen.png
