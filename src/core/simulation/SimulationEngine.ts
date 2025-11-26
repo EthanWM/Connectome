@@ -30,11 +30,13 @@ export class SimulationEngine {
         const neuron = this.getNeuron(id)
         if (neuron) {
             const neuron = this.getNeuron(id);
+            if (neuron) {
+                neuron.lesion();
+            }
         }
     }
 
     public getGlobalActivity(): number {
-        // TODO: Return sum of all neuron voltages
         let totalVoltage = 0;
         this.neurons.forEach((neuron) => {
             totalVoltage += neuron.voltage;
