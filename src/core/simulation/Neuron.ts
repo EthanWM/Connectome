@@ -7,8 +7,9 @@ export class Neuron {
     public voltage: number;
     public threshold: number;
     public restingPotential: number;
-    public presynapticConnections: SynapseConnection[];
-    public postsynapticConnections: SynapseConnection[];
+    public timeConstant: number;
+    public incomingCurrent: number;
+    public outputConnections: SynapseConnection[];
     public refractoryTimer: number;
     public isLesioned: boolean;
 
@@ -17,20 +18,31 @@ export class Neuron {
         this.voltage = 0;
         this.threshold = 0;
         this.restingPotential = 0;
-        this.presynapticConnections = [];
-        this.postsynapticConnections = [];
+        this.timeConstant = 10;
+        this.incomingCurrent = 0;
+        this.outputConnections = [];
         this.refractoryTimer = 0;
         this.isLesioned = false;
     }
 
     public update(dt: number): void {
-        //Leak
-        let voltageLeakAtTimestep = (this.voltage - this.restingPotential)
-        //Integrate
-        //Fire
+        // deltaV = 1/tau[RI(t)-leak]dt
+        const leak = -(this.voltage - this.restingPotential);
+        const totalVoltageChange = (leak + this.incomingCurrent) / this.timeConstant;
+        this.voltage += totalVoltageChange;
+        if (this.voltage >= this.threshold && this.refractoryTimer <= 0) {
+            this.fire();
+        }
     }
 
+    public stimulate(currentStrength: number): void {
+        this.incomingCurrent += currentStrength;
+    }
+
+    public fire(): void {
+
+    }
     public addConnection(target: Neuron, weight: number, type: SynapseType): void {
-        this.presynapticConnections.push({ target, weight, type });
+        this.outputConnections.push({ target, weight, type });
     }
 }

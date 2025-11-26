@@ -34,21 +34,21 @@ describe('ConnectomeParser', () => {
             const n2 = engine.getNeuron('N2');
             const n3 = engine.getNeuron('N3');
 
-            expect(n1?.presynapticConnections).toHaveLength(1);
-            expect(n1?.presynapticConnections[0]).toEqual({
+            expect(n1?.outputConnections).toHaveLength(1);
+            expect(n1?.outputConnections[0]).toEqual({
                 target: n2,
                 weight: 0.5,
                 type: SynapseType.Chemical
             });
 
-            expect(n2?.presynapticConnections).toHaveLength(1);
-            expect(n2?.presynapticConnections[0]).toEqual({
+            expect(n2?.outputConnections).toHaveLength(1);
+            expect(n2?.outputConnections[0]).toEqual({
                 target: n3,
                 weight: 0.8,
                 type: SynapseType.Chemical
             });
 
-            expect(n3?.presynapticConnections).toHaveLength(0);
+            expect(n3?.outputConnections).toHaveLength(0);
         });
 
         it('should handle missing source or target neurons gracefully', () => {
@@ -60,7 +60,7 @@ describe('ConnectomeParser', () => {
             const engine = ConnectomeParser.parseConnectome(badData);
             const n1 = engine.getNeuron('N1');
 
-            expect(n1?.presynapticConnections).toHaveLength(0);
+            expect(n1?.outputConnections).toHaveLength(0);
         });
     });
 

@@ -19,10 +19,10 @@ export class SimulationEngine {
         });
     }
 
-    public stimulateNeuron(id: string, strength: number): void {
+    public stimulateNeuron(id: string, currentStrength: number): void {
         const neuron = this.getNeuron(id);
         if (neuron) {
-            neuron.stimulate(strength);
+            neuron.stimulate(currentStrength);
         }
     }
 
