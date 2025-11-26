@@ -7,7 +7,7 @@ describe('Neuron', () => {
         const neuron = new Neuron('n1');
         expect(neuron.id).toBe('n1');
         expect(neuron.voltage).toBe(0);
-        expect(neuron.presynapticConnections).toEqual([]);
+        expect(neuron.outputConnections).toEqual([]);
         expect(neuron.isLesioned).toBe(false);
     });
 
@@ -17,8 +17,8 @@ describe('Neuron', () => {
         
         source.addConnection(target, 0.5, SynapseType.Chemical);
         
-        expect(source.presynapticConnections).toHaveLength(1);
-        expect(source.presynapticConnections[0]).toEqual({
+        expect(source.outputConnections).toHaveLength(1);
+        expect(source.outputConnections[0]).toEqual({
             target: target,
             weight: 0.5,
             type: SynapseType.Chemical
