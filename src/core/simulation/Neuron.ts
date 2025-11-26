@@ -37,6 +37,10 @@ export class Neuron {
         }
     }
 
+    public lesion() {
+        this.isLesioned = true;
+    }
+
     public stimulate(currentStrength: number): void {
         this.incomingCurrent += currentStrength;
     }
