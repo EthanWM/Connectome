@@ -14,20 +14,32 @@ export class SimulationEngine {
     }
 
     public step(): void {
-        // TODO: Execute one simulation frame for all neurons
+        this.neurons.forEach((neuron) => {
+            neuron.update();
+        });
     }
 
     public stimulateNeuron(id: string, strength: number): void {
-        // TODO: Add voltage to specified neuron
+        const neuron = this.getNeuron(id);
+        if (neuron) {
+            neuron.stimulate(strength);
+        }
     }
 
     public lesionNeuron(id: string): void {
-        // TODO: Mark neuron as lesioned
+        const neuron = this.getNeuron(id)
+        if (neuron) {
+            const neuron = this.getNeuron(id);
+        }
     }
 
     public getGlobalActivity(): number {
         // TODO: Return sum of all neuron voltages
-        return 0;
+        let totalVoltage = 0;
+        this.neurons.forEach((neuron) => {
+            totalVoltage += neuron.voltage;
+        });
+        return totalVoltage;
     }
 
     public getNeuron(id: string): Neuron | undefined {
