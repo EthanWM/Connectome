@@ -11,6 +11,7 @@ export class Neuron {
     public incomingCurrent: number;
     public outputConnections: SynapseConnection[];
     public refractoryTimer: number;
+    public refractoryPeriod: number;
     public isLesioned: boolean;
 
     constructor(id: string) {
@@ -22,6 +23,7 @@ export class Neuron {
         this.incomingCurrent = 0;
         this.outputConnections = [];
         this.refractoryTimer = 0;
+        this.refractoryPeriod = 2;
         this.isLesioned = false;
     }
 
@@ -40,7 +42,12 @@ export class Neuron {
     }
 
     public fire(): void {
-
+        this.voltage = this.restingPotential;
+        this.refractoryTimer = this.refractoryPeriod;
+        // Propagate to connected neurons
+        this.outputConnections.forEach((connection) => {
+            connection.target.stimulate(connection.weight);
+        });
     }
     public addConnection(target: Neuron, weight: number, type: SynapseType): void {
         this.outputConnections.push({ target, weight, type });

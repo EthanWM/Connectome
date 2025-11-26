@@ -13,9 +13,9 @@ export class SimulationEngine {
         this.neurons.set(neuron.id, neuron);
     }
 
-    public step(): void {
+    public step(dt: number): void {
         this.neurons.forEach((neuron) => {
-            neuron.update();
+            neuron.update(dt);
         });
     }
 
