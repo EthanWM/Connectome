@@ -37,6 +37,9 @@ export class Neuron {
         const leak = -(this.voltage - this.restingPotential);
         const totalVoltageChange = (leak + this.incomingCurrent) / this.timeConstant;
         this.voltage += totalVoltageChange;
+
+        // Reset incoming current after integration
+        this.incomingCurrent = 0;
     }
 
     public lesion() {
