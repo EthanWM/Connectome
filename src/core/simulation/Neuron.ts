@@ -28,13 +28,15 @@ export class Neuron {
     }
 
     public update(dt: number): void {
+        // Check threshold first (spike initiation is instantaneous)
+        if (this.voltage >= this.threshold && this.refractoryTimer <= 0) {
+            this.fire();
+        }
+
         // deltaV = 1/tau[RI(t)-leak]dt
         const leak = -(this.voltage - this.restingPotential);
         const totalVoltageChange = (leak + this.incomingCurrent) / this.timeConstant;
         this.voltage += totalVoltageChange;
-        if (this.voltage >= this.threshold && this.refractoryTimer <= 0) {
-            this.fire();
-        }
     }
 
     public lesion() {
