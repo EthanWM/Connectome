@@ -4,6 +4,11 @@ export interface ConnectomeNode {
     id: string;
     name: string;
     type?: string;
+    position?: {
+        x: number;
+        y: number;
+        z: number;
+    };
 }
 
 export interface ConnectomeEdge {
