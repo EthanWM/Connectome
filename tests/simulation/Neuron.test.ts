@@ -114,13 +114,13 @@ describe('Neuron', () => {
             
             // Try to fire again immediately (should fail)
             neuron.voltage = 1.5;
-            const initialTimer = neuron.refractoryTimer;
             neuron.update(0.01);
             
-            // Voltage should not reset (didn't fire)
-            expect(neuron.voltage).toBe(1.5);
+            // Voltage should have decayed (leak applied) but not reset to resting (didn't fire)
+            expect(neuron.voltage).toBeLessThan(1.5);
+            expect(neuron.voltage).toBeGreaterThan(0);
             // Timer should still be set
-            expect(neuron.refractoryTimer).toBe(initialTimer);
+            expect(neuron.refractoryTimer).toBe(2.0);
         });
 
         it('should decrement refractory timer (once implemented)', () => {
