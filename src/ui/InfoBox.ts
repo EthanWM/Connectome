@@ -1,14 +1,20 @@
 // Neuron info display panel
 
 import type { Neuron } from '../core/simulation/Neuron';
-import { ActivityGraph } from './ActivityGraph';
+
+export interface InfoBoxCallbacks {
+    onFire?: (neuron: Neuron) => void;
+    onLesion?: (neuron: Neuron) => void;
+}
 
 export class InfoBox {
     private container: HTMLElement;
     private currentNeuron: Neuron | null = null;
+    private callbacks: InfoBoxCallbacks;
 
-    constructor(container: HTMLElement) {
+    constructor(container: HTMLElement, callbacks: InfoBoxCallbacks = {}) {
         this.container = container;
+        this.callbacks = callbacks;
         this.setupUI();
     }
     // Just creating the HTML dynamically instead of web components for now, see ActivityGraph for rationale.
@@ -50,8 +56,33 @@ export class InfoBox {
                         <span id="info-state" class="font-mono">—</span>
                     </div>
                 </div>
+                <div class="flex gap-2 mt-4 pt-3 border-t border-slate-700/50">
+                    <button id="btn-fire-neuron" class="flex-1 px-3 py-1.5 rounded text-xs font-medium bg-orange-600 hover:bg-orange-500 text-white transition-colors" title="Fire this neuron">
+                        ⚡ Fire
+                    </button>
+                    <button id="btn-lesion-neuron" class="flex-1 px-3 py-1.5 rounded text-xs font-medium bg-red-600 hover:bg-red-500 text-white transition-colors" title="Lesion this neuron">
+                        ✕ Lesion
+                    </button>
+                </div>
             </div>
         `;
+
+        this.bindEvents();
+    }
+
+    private bindEvents(): void {
+        document.getElementById('btn-fire-neuron')?.addEventListener('click', () => {
+            if (this.currentNeuron && !this.currentNeuron.isLesioned) {
+                this.callbacks.onFire?.(this.currentNeuron);
+            }
+        });
+
+        document.getElementById('btn-lesion-neuron')?.addEventListener('click', () => {
+            if (this.currentNeuron && !this.currentNeuron.isLesioned) {
+                this.callbacks.onLesion?.(this.currentNeuron);
+                this.update();  // Update state display
+            }
+        });
     }
 
     public show(neuron: Neuron): void {
@@ -98,6 +129,32 @@ export class InfoBox {
             } else {
                 stateEl.textContent = 'Resting';
                 stateEl.className = 'font-mono text-gray-400';
+            }
+        }
+
+        // Disable action buttons if neuron is lesioned
+        const fireBtn = document.getElementById('btn-fire-neuron') as HTMLButtonElement;
+        const lesionBtn = document.getElementById('btn-lesion-neuron') as HTMLButtonElement;
+        
+        if (fireBtn) {
+            fireBtn.disabled = neuron.isLesioned;
+            if (neuron.isLesioned) {
+                fireBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                fireBtn.classList.remove('hover:bg-orange-500');
+            } else {
+                fireBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                fireBtn.classList.add('hover:bg-orange-500');
+            }
+        }
+        
+        if (lesionBtn) {
+            lesionBtn.disabled = neuron.isLesioned;
+            if (neuron.isLesioned) {
+                lesionBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                lesionBtn.classList.remove('hover:bg-red-500');
+            } else {
+                lesionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                lesionBtn.classList.add('hover:bg-red-500');
             }
         }
     }

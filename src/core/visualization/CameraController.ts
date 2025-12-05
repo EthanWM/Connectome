@@ -12,9 +12,6 @@ export class CameraController {
     private focusIndicator: THREE.Mesh;
     private isAnimating: boolean = false;
     private onFocusCallback?: (neuronId: string | null) => void;
-    private onClickCallback?: (neuronId: string) => void;
-    private clickTimeout: number | null = null;
-    private static readonly DOUBLE_CLICK_DELAY = 250; // ms
 
     constructor(camera: THREE.Camera, domElement: HTMLElement) {
         this.camera = camera;
@@ -43,11 +40,8 @@ export class CameraController {
         this.controls.panSpeed = 0.8;
         
         this.controls.rotateSpeed = 0.5;
-
-        // Single-click to stimulate
-        domElement.addEventListener('click', (event) => this.onClick(event, domElement));
         
-        // Double-click to focus on a point
+        // Double-click to focus on a neuron
         domElement.addEventListener('dblclick', (event) => this.onDoubleClick(event, domElement));
         
         // Hide focus indicator when user pans manually (not during animation)
@@ -74,44 +68,7 @@ export class CameraController {
         this.onFocusCallback = callback;
     }
 
-    public setOnClick(callback: (neuronId: string) => void): void {
-        this.onClickCallback = callback;
-    }
-
-    private onClick(event: MouseEvent, domElement: HTMLElement): void {
-        if (!this.scene || !this.onClickCallback) return;
-
-        // Calculate mouse position in normalized device coordinates
-        const rect = domElement.getBoundingClientRect();
-        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-        // Raycast to find intersected neuron meshes
-        this.raycaster.setFromCamera(this.mouse, this.camera as THREE.PerspectiveCamera);
-        const neuronMeshes = this.scene.children.filter(
-            obj => obj !== this.focusIndicator && 
-                   obj instanceof THREE.Mesh && 
-                   obj.userData?.neuronId
-        );
-        const intersects = this.raycaster.intersectObjects(neuronMeshes, false);
-
-        if (intersects.length > 0) {
-            const neuronId = intersects[0].object.userData.neuronId;
-            // Delay click to distinguish from double-click
-            this.clickTimeout = window.setTimeout(() => {
-                this.onClickCallback!(neuronId);
-                this.clickTimeout = null;
-            }, CameraController.DOUBLE_CLICK_DELAY);
-        }
-    }
-
     private onDoubleClick(event: MouseEvent, domElement: HTMLElement): void {
-        // Cancel any pending single-click action
-        if (this.clickTimeout !== null) {
-            clearTimeout(this.clickTimeout);
-            this.clickTimeout = null;
-        }
-        
         if (!this.scene) return;
 
         // Calculate mouse position in normalized device coordinates

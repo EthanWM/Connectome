@@ -248,13 +248,6 @@ export class VisualizationEngine {
         });
     }
 
-    /**
-     * Set callback for when a neuron is clicked (for stimulation)
-     */
-    public setOnClick(callback: (neuronId: string) => void): void {
-        this.cameraController.setOnClick(callback);
-    }
-
     public getNeuronMesh(id: string): THREE.Mesh | undefined {
         return this.neuronMeshes.get(id);
     }

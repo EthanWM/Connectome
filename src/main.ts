@@ -90,7 +90,19 @@ async function initialize(): Promise<void> {
     }
     
     if (infoBoxEl) {
-        infoBox = new InfoBox(infoBoxEl);
+        infoBox = new InfoBox(infoBoxEl, {
+            onFire: (neuron) => {
+                neuron.fire();
+                visualization.updateFromEngine(engine);
+                visualization.flashOutgoingSynapses(neuron.id);
+                console.log(`Fired neuron ${neuron.id}`);
+            },
+            onLesion: (neuron) => {
+                neuron.lesion();
+                visualization.updateFromEngine(engine);
+                console.log(`Lesioned neuron ${neuron.id}`);
+            }
+        });
         
         // Wire up focus callback to show info box and activity graph
         visualization.setOnFocus((neuronId) => {
@@ -127,25 +139,6 @@ async function initialize(): Promise<void> {
             }
         });
     }
-    
-    // Wire up click to fire or lesion neurons based on mode
-    visualization.setOnClick((neuronId) => {
-        const neuron = engine.getNeuron(neuronId);
-        if (!neuron) return;
-        
-        const mode = simControls?.getMode() ?? 'fire';
-        
-        if (mode === 'fire') {
-            neuron.fire();
-            visualization.updateFromEngine(engine);
-            visualization.flashOutgoingSynapses(neuronId);
-            console.log(`Fired neuron ${neuronId}`);
-        } else {
-            neuron.lesion();
-            visualization.updateFromEngine(engine);
-            console.log(`Lesioned neuron ${neuronId}`);
-        }
-    });
     
     // Stimulate a neuron to see activity
     const neurons = engine.getAllNeurons();

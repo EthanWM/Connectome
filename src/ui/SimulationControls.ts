@@ -1,14 +1,11 @@
 // Simulation playback controls
 
-export type InteractionMode = 'fire' | 'lesion';
-
 export interface SimulationControlsCallbacks {
     onPlay: () => void;
     onPause: () => void;
     onStep: () => void;
     onReset: () => void;
     onSpeedChange: (speed: number) => void;
-    onModeChange?: (mode: InteractionMode) => void;
 }
 
 export class SimulationControls {
@@ -16,7 +13,6 @@ export class SimulationControls {
     private callbacks: SimulationControlsCallbacks;
     private isPlaying: boolean = true;
     private stepCount: number = 0;
-    private mode: InteractionMode = 'fire';
 
     constructor(container: HTMLElement, callbacks: SimulationControlsCallbacks) {
         this.container = container;
@@ -55,15 +51,6 @@ export class SimulationControls {
                 </svg>
             </button>
             <div class="h-6 w-px bg-slate-700 mx-1"></div>
-            <div class="flex items-center gap-1 px-1">
-                <button id="btn-mode-fire" class="px-2 py-1 rounded text-xs font-medium transition-colors bg-orange-600 text-white" title="Click neurons to fire them">
-                    Fire
-                </button>
-                <button id="btn-mode-lesion" class="px-2 py-1 rounded text-xs font-medium transition-colors bg-slate-700 text-gray-300 hover:bg-slate-600" title="Click neurons to lesion them">
-                    Lesion
-                </button>
-            </div>
-            <div class="h-6 w-px bg-slate-700 mx-1"></div>
             <div class="flex items-center gap-2 px-2">
                 <span class="w-2 h-2 rounded-full bg-green-500" id="status-dot"></span>
                 <span class="text-xs text-gray-200" id="step-counter">Step 0</span>
@@ -96,41 +83,6 @@ export class SimulationControls {
             this.updateStepCounter();
             this.callbacks.onReset();
         });
-
-        document.getElementById('btn-mode-fire')?.addEventListener('click', () => {
-            this.setMode('fire');
-        });
-
-        document.getElementById('btn-mode-lesion')?.addEventListener('click', () => {
-            this.setMode('lesion');
-        });
-    }
-
-    private setMode(mode: InteractionMode): void {
-        this.mode = mode;
-        this.updateModeButtons();
-        this.callbacks.onModeChange?.(mode);
-    }
-
-    private updateModeButtons(): void {
-        const fireBtn = document.getElementById('btn-mode-fire');
-        const lesionBtn = document.getElementById('btn-mode-lesion');
-
-        if (this.mode === 'fire') {
-            fireBtn?.classList.remove('bg-slate-700', 'text-gray-300', 'hover:bg-slate-600');
-            fireBtn?.classList.add('bg-orange-600', 'text-white');
-            lesionBtn?.classList.remove('bg-red-600', 'text-white');
-            lesionBtn?.classList.add('bg-slate-700', 'text-gray-300', 'hover:bg-slate-600');
-        } else {
-            fireBtn?.classList.remove('bg-orange-600', 'text-white');
-            fireBtn?.classList.add('bg-slate-700', 'text-gray-300', 'hover:bg-slate-600');
-            lesionBtn?.classList.remove('bg-slate-700', 'text-gray-300', 'hover:bg-slate-600');
-            lesionBtn?.classList.add('bg-red-600', 'text-white');
-        }
-    }
-
-    public getMode(): InteractionMode {
-        return this.mode;
     }
 
     private updatePlayPauseState(): void {
