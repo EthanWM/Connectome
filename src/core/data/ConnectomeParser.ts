@@ -30,6 +30,11 @@ export class ConnectomeParser {
             const neuron = new Neuron(node.id, node.name);
             neuron.type = node.type;
             neuron.position = node.position;
+            // Initialize simulation parameters (Leaky-Integrate-and-Fire model)
+            neuron.restingPotential = 0;      // Resting voltage
+            neuron.threshold = 1;              // Spike threshold
+            neuron.voltage = neuron.restingPotential; // Start at rest
+            neuron.timeConstant = 10;         // Membrane time constant (ms)
             neuronMap.set(node.id, neuron);
             engine.addNeuron(neuron);
         }

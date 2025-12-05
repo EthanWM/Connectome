@@ -4,9 +4,9 @@ import * as THREE from 'three';
 import type { Neuron } from '../simulation/Neuron';
 
 // Color constants
-const REST_COLOR = new THREE.Color(0x4488ff);  // Blue at rest
+const REST_COLOR = new THREE.Color(0xffff00);  // Yellow at rest
 const ACTIVE_COLOR = new THREE.Color(0xff4444); // Red when active
-const FIRED_COLOR = new THREE.Color(0xffff00);  // Yellow when just fired
+const FIRED_COLOR = new THREE.Color(0xffaa00);  // Orange when just fired
 
 export class NeuronRenderer {
     private static readonly BASE_RADIUS = 0.25;  // Smaller to reduce overlap in dense regions
@@ -18,12 +18,8 @@ export class NeuronRenderer {
             NeuronRenderer.SEGMENTS,
             NeuronRenderer.SEGMENTS
         );
-        const material = new THREE.MeshStandardMaterial({
+        const material = new THREE.MeshBasicMaterial({
             color: REST_COLOR,
-            emissive: new THREE.Color(0x000000),
-            emissiveIntensity: 0,
-            metalness: 0.3,
-            roughness: 0.7,
         });
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.copy(position);
@@ -32,7 +28,7 @@ export class NeuronRenderer {
     }
 
     public static updateMesh(mesh: THREE.Mesh, neuron: Neuron): void {
-        const material = mesh.material as THREE.MeshStandardMaterial;
+        const material = mesh.material as THREE.MeshBasicMaterial;
         
         // Normalize voltage for color interpolation (assuming threshold around 1.0)
         const activity = Math.max(0, Math.min(1, neuron.voltage / (neuron.threshold || 1)));
@@ -40,13 +36,9 @@ export class NeuronRenderer {
         // Check if neuron just fired (in refractory period)
         if (neuron.refractoryTimer > 0) {
             material.color.copy(FIRED_COLOR);
-            material.emissive.copy(FIRED_COLOR);
-            material.emissiveIntensity = 0.5;
         } else {
             // Interpolate between rest and active color based on voltage
             material.color.copy(REST_COLOR).lerp(ACTIVE_COLOR, activity);
-            material.emissive.copy(ACTIVE_COLOR);
-            material.emissiveIntensity = activity * 0.3;
         }
         
         // Scale slightly based on activity

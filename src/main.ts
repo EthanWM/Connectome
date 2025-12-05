@@ -5,6 +5,7 @@ import { Neuron } from "./core/simulation/Neuron";
 import { VisualizationEngine, NeuronPosition } from "./core/visualization/VisualizationEngine";
 import { InfoBox } from "./ui/InfoBox";
 import { SimulationControls } from "./ui/SimulationControls";
+import { ActivityGraph } from "./ui/ActivityGraph";
 
 console.log('ICDS Initializing...');
 
@@ -12,6 +13,7 @@ let engine: SimulationEngine;
 let visualization: VisualizationEngine;
 let infoBox: InfoBox;
 let simControls: SimulationControls;
+let activityGraph: ActivityGraph;
 let lastTime = 0;
 let isRunning = true;
 let simulationSpeed = 1;
@@ -81,19 +83,26 @@ async function initialize(): Promise<void> {
     // Initialize UI components
     const infoBoxEl = document.getElementById('info-box');
     const controlsEl = document.getElementById('controls');
+    const activityGraphEl = document.getElementById('activity-graph');
+    
+    if (activityGraphEl) {
+        activityGraph = new ActivityGraph(activityGraphEl);
+    }
     
     if (infoBoxEl) {
         infoBox = new InfoBox(infoBoxEl);
         
-        // Wire up focus callback to show info box
+        // Wire up focus callback to show info box and activity graph
         visualization.setOnFocus((neuronId) => {
             if (neuronId) {
                 const neuron = engine.getNeuron(neuronId);
                 if (neuron) {
                     infoBox.show(neuron);
+                    activityGraph?.show(neuron);
                 }
             } else {
                 infoBox.hide();
+                activityGraph?.hide();
             }
         });
     }
@@ -107,6 +116,7 @@ async function initialize(): Promise<void> {
                 visualization.updateFromEngine(engine);
                 simControls.incrementStep();
                 infoBox?.update();
+                activityGraph?.update();
             },
             onReset: () => {
                 // Reload the simulation
@@ -138,6 +148,7 @@ function animate(currentTime: number): void {
         visualization.updateFromEngine(engine);
         simControls?.incrementStep();
         infoBox?.update();
+        activityGraph?.update();
     }
     
     visualization.render();

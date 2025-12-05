@@ -52,24 +52,7 @@ export class VisualizationEngine {
         this.synapsesByNeuron = new Map();
         this.positions = new Map();
         
-        this.setupLights();
         this.setupResizeHandler(canvas);
-    }
-
-    private setupLights(): void {
-        // Ambient light for base illumination
-        const ambient = new THREE.AmbientLight(0x404040, 0.5);
-        this.scene.add(ambient);
-        
-        // Main directional light
-        const directional = new THREE.DirectionalLight(0xffffff, 1);
-        directional.position.set(50, 50, 50);
-        this.scene.add(directional);
-        
-        // Fill light from opposite side
-        const fill = new THREE.DirectionalLight(0x4488ff, 0.3);
-        fill.position.set(-50, -50, -50);
-        this.scene.add(fill);
     }
 
     private setupResizeHandler(canvas: HTMLCanvasElement): void {

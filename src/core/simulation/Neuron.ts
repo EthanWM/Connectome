@@ -43,7 +43,7 @@ export class Neuron {
         this.isLesioned = false;
     }
 
-    public update(dt: number): void {
+    public update(_dt: number): void {
         // Check threshold first (spike initiation is instantaneous)
         if (this.voltage >= this.threshold && this.refractoryTimer <= 0) {
             this.fire();
