@@ -140,11 +140,12 @@ async function initialize(): Promise<void> {
         });
     }
     
-    // Stimulate a neuron to see activity
-    const neurons = engine.getAllNeurons();
-    if (neurons.length > 0) {
-        engine.stimulateNeuron(neurons[0].id, 5);
-        console.log(`Stimulated neuron ${neurons[0].id}`);
+    // Focus on VA5 neuron at startup
+    const va5 = engine.getNeuron('VA5');
+    if (va5) {
+        visualization.focusOnNeuron('VA5');
+        infoBox?.show(va5);
+        activityGraph?.show(va5);
     }
     
     // Start animation loop

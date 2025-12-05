@@ -142,6 +142,12 @@ export class CameraController {
         this.controls.target.set(x, y, z);
     }
 
+    public focusAt(x: number, y: number, z: number): void {
+        this.controls.target.set(x, y, z);
+        this.focusIndicator.position.set(x, y, z);
+        this.focusIndicator.visible = true;
+    }
+
     public getTarget(): THREE.Vector3 {
         return this.controls.target.clone();
     }

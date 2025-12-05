@@ -251,4 +251,16 @@ export class VisualizationEngine {
     public getNeuronMesh(id: string): THREE.Mesh | undefined {
         return this.neuronMeshes.get(id);
     }
+
+    /**
+     * Programmatically focus on a neuron by ID
+     */
+    public focusOnNeuron(id: string): void {
+        const mesh = this.neuronMeshes.get(id);
+        if (mesh) {
+            const pos = mesh.position;
+            this.cameraController.focusAt(pos.x, pos.y, pos.z);
+            this.onNeuronFocus(id);
+        }
+    }
 }

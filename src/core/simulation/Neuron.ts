@@ -52,11 +52,17 @@ export class Neuron {
         // Decrement refractory timer based on elapsed time
         if (this.refractoryTimer > 0) {
             this.refractoryTimer -= dt;
+            // During refractory period, ignore incoming current and just leak toward resting
+            const leak = -(this.voltage - this.restingPotential);
+            this.voltage += leak / this.timeConstant;
+            this.incomingCurrent = 0;
+            return;
         }
 
         // Check threshold first (spike initiation is instantaneous)
-        if (this.voltage >= this.threshold && this.refractoryTimer <= 0) {
+        if (this.voltage >= this.threshold) {
             this.fire();
+            return;
         }
 
         // deltaV = 1/tau[RI(t)-leak]dt
@@ -82,7 +88,8 @@ export class Neuron {
             return;
         }
         
-        this.voltage = this.restingPotential;
+        // Set voltage to threshold momentarily (for visualization/graph)
+        this.voltage = this.threshold;
         this.refractoryTimer = this.refractoryPeriod;
         // Propagate to connected neurons
         console.log(`${this.name} fired! Propagating to ${this.outputConnections.length} connections`);
