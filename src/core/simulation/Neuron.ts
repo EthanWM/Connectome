@@ -2,8 +2,20 @@
 
 import type { SynapseConnection, SynapseType } from './types';
 
+export interface NeuronPosition {
+    x: number;
+    y: number;
+    z: number;
+}
+
 export class Neuron {
+    // Identity
     public id: string;
+    public name: string;
+    public type?: string;
+    public position?: NeuronPosition;
+
+    // Simulation state
     public voltage: number;
     public threshold: number;
     public restingPotential: number;
@@ -14,8 +26,12 @@ export class Neuron {
     public refractoryPeriod: number;
     public isLesioned: boolean;
 
-    constructor(id: string) {
+    constructor(id: string, name?: string) {
+        // Identity
         this.id = id;
+        this.name = name ?? id;
+        
+        // Simulation state
         this.voltage = 0;
         this.threshold = 0;
         this.restingPotential = 0;
