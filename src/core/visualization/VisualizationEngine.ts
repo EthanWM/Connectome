@@ -1,8 +1,10 @@
 // Three.js scene manager
 
 import * as THREE from 'three';
+import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import type { SimulationEngine } from '../simulation/SimulationEngine';
 import { NeuronRenderer } from './NeuronRenderer';
+import { SynapseRenderer } from './SynapseRenderer';
 import { CameraController } from './CameraController';
 
 export interface NeuronPosition {
@@ -15,6 +17,9 @@ export class VisualizationEngine {
     private camera: THREE.PerspectiveCamera;
     private renderer: THREE.WebGLRenderer;
     private neuronMeshes: Map<string, THREE.Mesh>;
+    private synapseLines: Line2[];
+    private synapsesByNeuron: Map<string, Line2[]>;  // Synapses grouped by source neuron
+    private focusedNeuronId: string | null = null;
     private cameraController: CameraController;
     private positions: Map<string, THREE.Vector3>;
 
@@ -40,8 +45,11 @@ export class VisualizationEngine {
         // Camera controls
         this.cameraController = new CameraController(this.camera, canvas);
         this.cameraController.setScene(this.scene);
+        this.cameraController.setOnFocus((neuronId) => this.onNeuronFocus(neuronId));
         
         this.neuronMeshes = new Map();
+        this.synapseLines = [];
+        this.synapsesByNeuron = new Map();
         this.positions = new Map();
         
         this.setupLights();
@@ -71,6 +79,9 @@ export class VisualizationEngine {
             this.camera.aspect = width / height;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(width, height);
+            
+            // Update line resolution for proper width rendering
+            SynapseRenderer.updateResolution(width, height);
         });
     }
 
@@ -82,12 +93,19 @@ export class VisualizationEngine {
     }
 
     public initializeFromEngine(engine: SimulationEngine): void {
-        // Clear existing meshes
+        // Clear existing meshes and lines
         this.neuronMeshes.forEach(mesh => this.scene.remove(mesh));
         this.neuronMeshes.clear();
+        this.synapseLines.forEach(line => this.scene.remove(line));
+        this.synapseLines = [];
+        this.synapsesByNeuron.clear();
+        this.focusedNeuronId = null;
         
         const neurons = engine.getAllNeurons();
         const neuronCount = neurons.length;
+        
+        // First pass: create neuron meshes and collect positions
+        const resolvedPositions = new Map<string, THREE.Vector3>();
         
         neurons.forEach((neuron, index) => {
             // Use provided position or generate spherical layout
@@ -106,12 +124,48 @@ export class VisualizationEngine {
                 );
             }
             
+            resolvedPositions.set(neuron.id, position);
+            
             const mesh = NeuronRenderer.createMesh(neuron, position);
             this.scene.add(mesh);
             this.neuronMeshes.set(neuron.id, mesh);
         });
         
-        console.log(`Visualization initialized with ${this.neuronMeshes.size} neuron meshes`);
+        // Second pass: create synapse lines using resolved positions
+        for (const neuron of neurons) {
+            const sourcePos = resolvedPositions.get(neuron.id);
+            if (!sourcePos) continue;
+            
+            const neuronSynapses: Line2[] = [];
+            
+            for (const connection of neuron.outputConnections) {
+                const targetPos = resolvedPositions.get(connection.target.id);
+                if (!targetPos) continue;
+                
+                const line = SynapseRenderer.createLine(
+                    sourcePos,
+                    targetPos,
+                    connection.type,
+                    connection.weight
+                );
+                // Store connection info for activity tracking
+                (line as any).sourceId = neuron.id;
+                (line as any).targetId = connection.target.id;
+                
+                // Hidden by default - shown on focus
+                line.visible = false;
+                
+                this.scene.add(line);
+                this.synapseLines.push(line);
+                neuronSynapses.push(line);
+            }
+            
+            if (neuronSynapses.length > 0) {
+                this.synapsesByNeuron.set(neuron.id, neuronSynapses);
+            }
+        }
+        
+        console.log(`Visualization initialized with ${this.neuronMeshes.size} neurons, ${this.synapseLines.length} synapses`);
     }
 
     public updateFromEngine(engine: SimulationEngine): void {
@@ -125,7 +179,61 @@ export class VisualizationEngine {
 
     public render(): void {
         this.cameraController.update();
+        
+        // Update flash decay on all visible synapses
+        for (const line of this.synapseLines) {
+            if (line.visible || (line as any).flashTime) {
+                const baseOpacity = line.visible ? 0.6 : 0;
+                SynapseRenderer.updateFlashDecay(line, baseOpacity);
+            }
+        }
+        
         this.renderer.render(this.scene, this.camera);
+    }
+
+    /**
+     * Called when a neuron is focused/unfocused via double-click
+     */
+    private onNeuronFocus(neuronId: string | null): void {
+        // Hide previously focused neuron's synapses
+        if (this.focusedNeuronId) {
+            const oldSynapses = this.synapsesByNeuron.get(this.focusedNeuronId);
+            if (oldSynapses) {
+                for (const line of oldSynapses) {
+                    line.visible = false;
+                }
+            }
+        }
+        
+        this.focusedNeuronId = neuronId;
+        
+        // Show newly focused neuron's synapses
+        if (neuronId) {
+            const synapses = this.synapsesByNeuron.get(neuronId);
+            if (synapses) {
+                for (const line of synapses) {
+                    line.visible = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * Flash a synapse to show activity during simulation
+     */
+    public flashSynapse(sourceId: string, targetId: string): void {
+        // Find the matching synapse line
+        const synapses = this.synapsesByNeuron.get(sourceId);
+        if (!synapses) return;
+        
+        for (const line of synapses) {
+            if ((line as any).targetId === targetId) {
+                // Make visible temporarily and flash
+                line.visible = true;
+                SynapseRenderer.flashActivity(line);
+                break;
+            }
+        }
     }
 
     public getNeuronMesh(id: string): THREE.Mesh | undefined {

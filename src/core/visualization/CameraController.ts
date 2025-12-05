@@ -11,6 +11,7 @@ export class CameraController {
     private scene?: THREE.Scene;
     private focusIndicator: THREE.Mesh;
     private isAnimating: boolean = false;
+    private onFocusCallback?: (neuronId: string | null) => void;
 
     constructor(camera: THREE.Camera, domElement: HTMLElement) {
         this.camera = camera;
@@ -50,6 +51,9 @@ export class CameraController {
                 const distance = this.focusIndicator.position.distanceTo(this.controls.target);
                 if (distance > 0.5) {
                     this.focusIndicator.visible = false;
+                    if (this.onFocusCallback) {
+                        this.onFocusCallback(null);
+                    }
                 }
             }
         });
@@ -60,6 +64,10 @@ export class CameraController {
         scene.add(this.focusIndicator);
     }
 
+    public setOnFocus(callback: (neuronId: string | null) => void): void {
+        this.onFocusCallback = callback;
+    }
+
     private onDoubleClick(event: MouseEvent, domElement: HTMLElement): void {
         if (!this.scene) return;
 
@@ -68,19 +76,30 @@ export class CameraController {
         this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-        // Raycast to find intersected objects (exclude the focus indicator)
+        // Raycast to find intersected objects (only Meshes with neuronId, exclude indicator)
         this.raycaster.setFromCamera(this.mouse, this.camera as THREE.PerspectiveCamera);
-        const objects = this.scene.children.filter(obj => obj !== this.focusIndicator);
-        const intersects = this.raycaster.intersectObjects(objects, false);
+        const neuronMeshes = this.scene.children.filter(
+            obj => obj !== this.focusIndicator && 
+                   obj instanceof THREE.Mesh && 
+                   obj.userData?.neuronId
+        );
+        const intersects = this.raycaster.intersectObjects(neuronMeshes, false);
 
         if (intersects.length > 0) {
-            // Focus on the clicked object
+            const object = intersects[0].object;
             const point = intersects[0].point;
+            const neuronId = object.userData.neuronId;
+            
             this.animateTargetTo(point.x, point.y, point.z);
             
             // Show and position focus indicator
             this.focusIndicator.position.copy(point);
             this.focusIndicator.visible = true;
+            
+            // Notify callback with neuron ID from userData
+            if (this.onFocusCallback) {
+                this.onFocusCallback(neuronId);
+            }
         }
     }
 
