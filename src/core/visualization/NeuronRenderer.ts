@@ -9,8 +9,8 @@ const ACTIVE_COLOR = new THREE.Color(0xff4444); // Red when active
 const FIRED_COLOR = new THREE.Color(0xffff00);  // Yellow when just fired
 
 export class NeuronRenderer {
-    private static readonly BASE_RADIUS = 0.5;
-    private static readonly SEGMENTS = 16;
+    private static readonly BASE_RADIUS = 0.25;  // Smaller to reduce overlap in dense regions
+    private static readonly SEGMENTS = 12;
 
     public static createMesh(neuron: Neuron, position: THREE.Vector3): THREE.Mesh {
         const geometry = new THREE.SphereGeometry(

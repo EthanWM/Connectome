@@ -22,19 +22,24 @@ export class VisualizationEngine {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x111122);
         
-        // Camera setup
-        const aspect = canvas.clientWidth / canvas.clientHeight;
+        // Get canvas dimensions (fallback to window size if not yet laid out)
+        const width = canvas.clientWidth || window.innerWidth;
+        const height = canvas.clientHeight || window.innerHeight;
+        
+        // Camera setup - positioned to view elongated worm body
+        const aspect = width / height;
         this.camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 1000);
-        this.camera.position.set(0, 50, 100);
+        this.camera.position.set(100, 0, 50);  // Side view
         this.camera.lookAt(0, 0, 0);
         
         // Renderer setup
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-        this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        this.renderer.setSize(width, height);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         
         // Camera controls
         this.cameraController = new CameraController(this.camera, canvas);
+        this.cameraController.setScene(this.scene);
         
         this.neuronMeshes = new Map();
         this.positions = new Map();

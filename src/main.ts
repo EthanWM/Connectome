@@ -13,8 +13,9 @@ let isRunning = true;
 
 /**
  * Extract positions from neurons, normalize and scale for visualization
+ * Applies extra spread to X/Z axes to separate dense clusters for visibility
  */
-function extractNormalizedPositions(neurons: Neuron[], targetRadius = 40): NeuronPosition[] {
+function extractNormalizedPositions(neurons: Neuron[], targetRadius = 80, spreadFactor = 3): NeuronPosition[] {
     const withPos = neurons.filter(n => n.position);
     if (withPos.length === 0) return [];
 
@@ -29,24 +30,22 @@ function extractNormalizedPositions(neurons: Neuron[], targetRadius = 40): Neuro
     centroid.y /= withPos.length;
     centroid.z /= withPos.length;
 
-    // Find max distance from centroid for scaling
-    let maxDist = 0;
+    // Find max distance from centroid for scaling (using Y as reference since it's longest)
+    let maxY = 0;
     for (const n of withPos) {
-        const dx = n.position!.x - centroid.x;
-        const dy = n.position!.y - centroid.y;
-        const dz = n.position!.z - centroid.z;
-        maxDist = Math.max(maxDist, Math.sqrt(dx * dx + dy * dy + dz * dz));
+        const dy = Math.abs(n.position!.y - centroid.y);
+        maxY = Math.max(maxY, dy);
     }
 
-    const scale = maxDist > 0 ? targetRadius / maxDist : 1;
+    const scale = maxY > 0 ? targetRadius / maxY : 1;
 
-    // Transform positions: center and scale
+    // Transform positions: center, scale, and spread X/Z axes
     return withPos.map(n => ({
         id: n.id,
         position: new THREE.Vector3(
-            (n.position!.x - centroid.x) * scale,
+            (n.position!.x - centroid.x) * scale * spreadFactor,
             (n.position!.y - centroid.y) * scale,
-            (n.position!.z - centroid.z) * scale
+            (n.position!.z - centroid.z) * scale * spreadFactor
         )
     }));
 }
