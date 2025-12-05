@@ -66,6 +66,10 @@ export class SynapseRenderer {
      */
     public static flashActivity(line: Line2): void {
         const material = line.material as LineMaterial;
+        // Store original visibility before flashing
+        if ((line as any).flashTime === undefined) {
+            (line as any).wasVisible = line.visible;
+        }
         material.opacity = 1.0;
         // Store flash timestamp for decay
         (line as any).flashTime = performance.now();
@@ -81,17 +85,21 @@ export class SynapseRenderer {
         
         const elapsed = performance.now() - flashTime;
         const flashDuration = 500; // ms
+        const wasVisible = (line as any).wasVisible ?? false;
+        const targetOpacity = wasVisible ? baseOpacity : 0;
         
         if (elapsed >= flashDuration) {
-            // Flash complete
+            // Flash complete - restore original visibility
             const material = line.material as LineMaterial;
-            material.opacity = baseOpacity;
+            material.opacity = targetOpacity;
+            line.visible = wasVisible;
             delete (line as any).flashTime;
+            delete (line as any).wasVisible;
         } else {
-            // Fade from 1.0 to baseOpacity
+            // Fade from 1.0 to target opacity
             const t = elapsed / flashDuration;
             const material = line.material as LineMaterial;
-            material.opacity = 1.0 - (1.0 - baseOpacity) * t;
+            material.opacity = 1.0 - (1.0 - targetOpacity) * t;
         }
     }
 }

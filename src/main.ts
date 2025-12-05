@@ -128,6 +128,25 @@ async function initialize(): Promise<void> {
         });
     }
     
+    // Wire up click to fire or lesion neurons based on mode
+    visualization.setOnClick((neuronId) => {
+        const neuron = engine.getNeuron(neuronId);
+        if (!neuron) return;
+        
+        const mode = simControls?.getMode() ?? 'fire';
+        
+        if (mode === 'fire') {
+            neuron.fire();
+            visualization.updateFromEngine(engine);
+            visualization.flashOutgoingSynapses(neuronId);
+            console.log(`Fired neuron ${neuronId}`);
+        } else {
+            neuron.lesion();
+            visualization.updateFromEngine(engine);
+            console.log(`Lesioned neuron ${neuronId}`);
+        }
+    });
+    
     // Stimulate a neuron to see activity
     const neurons = engine.getAllNeurons();
     if (neurons.length > 0) {
@@ -140,7 +159,8 @@ async function initialize(): Promise<void> {
 }
 
 function animate(currentTime: number): void {
-    const dt = Math.min((currentTime - lastTime) / 1000, 0.1) * simulationSpeed;
+    // Use fixed dt for now - speed control needs more sophisticated implementation
+    const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
     lastTime = currentTime;
     
     if (isRunning && dt > 0) {

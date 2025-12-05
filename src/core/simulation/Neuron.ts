@@ -43,7 +43,17 @@ export class Neuron {
         this.isLesioned = false;
     }
 
-    public update(_dt: number): void {
+    public update(dt: number): void {
+        // Lesioned neurons do not update
+        if (this.isLesioned) {
+            return;
+        }
+        
+        // Decrement refractory timer based on elapsed time
+        if (this.refractoryTimer > 0) {
+            this.refractoryTimer -= dt;
+        }
+
         // Check threshold first (spike initiation is instantaneous)
         if (this.voltage >= this.threshold && this.refractoryTimer <= 0) {
             this.fire();
@@ -67,9 +77,15 @@ export class Neuron {
     }
 
     public fire(): void {
+        // Lesioned neurons cannot fire
+        if (this.isLesioned) {
+            return;
+        }
+        
         this.voltage = this.restingPotential;
         this.refractoryTimer = this.refractoryPeriod;
         // Propagate to connected neurons
+        console.log(`${this.name} fired! Propagating to ${this.outputConnections.length} connections`);
         this.outputConnections.forEach((connection) => {
             connection.target.stimulate(connection.weight);
         });

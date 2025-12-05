@@ -1,6 +1,7 @@
 // Neuron info display panel
 
 import type { Neuron } from '../core/simulation/Neuron';
+import { ActivityGraph } from './ActivityGraph';
 
 export class InfoBox {
     private container: HTMLElement;
@@ -10,7 +11,7 @@ export class InfoBox {
         this.container = container;
         this.setupUI();
     }
-
+    // Just creating the HTML dynamically instead of web components for now, see ActivityGraph for rationale.
     private setupUI(): void {
         this.container.className = `
             absolute top-4 right-4 w-64

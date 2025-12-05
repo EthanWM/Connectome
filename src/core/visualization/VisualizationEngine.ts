@@ -156,7 +156,26 @@ export class VisualizationEngine {
             const mesh = this.neuronMeshes.get(neuron.id);
             if (mesh) {
                 NeuronRenderer.updateMesh(mesh, neuron);
+                
+                // Flash outgoing synapses when neuron just fired (refractory timer near max)
+                if (neuron.refractoryTimer > neuron.refractoryPeriod * 0.95) {
+                    this.flashOutgoingSynapses(neuron.id);
+                }
             }
+        }
+    }
+
+    /**
+     * Flash all outgoing synapses from a neuron
+     */
+    public flashOutgoingSynapses(neuronId: string): void {
+        const synapses = this.synapsesByNeuron.get(neuronId);
+        if (!synapses) return;
+        
+        for (const line of synapses) {
+            // flashActivity stores original visibility before we set visible=true
+            SynapseRenderer.flashActivity(line);
+            line.visible = true;
         }
     }
 
@@ -227,6 +246,13 @@ export class VisualizationEngine {
             this.onNeuronFocus(neuronId);
             callback(neuronId);
         });
+    }
+
+    /**
+     * Set callback for when a neuron is clicked (for stimulation)
+     */
+    public setOnClick(callback: (neuronId: string) => void): void {
+        this.cameraController.setOnClick(callback);
     }
 
     public getNeuronMesh(id: string): THREE.Mesh | undefined {
