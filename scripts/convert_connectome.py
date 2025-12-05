@@ -20,13 +20,42 @@ def convert_connectome():
     chemical_matrix = data['chemical_connectome']
     
     # Create Nodes
+    # Try to load neuron positions if available
+    positions = {}
+    try:
+        import wormneuroatlas as wa
+        wormneuroatlas_path = os.path.dirname(wa.__file__)
+        positions_file = os.path.join(wormneuroatlas_path, 'data', 'anatlas_neuron_positions.txt')
+        if os.path.exists(positions_file):
+            with open(positions_file, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        parts = line.split()
+                        if len(parts) >= 4:
+                            neuron_id = parts[0]
+                            try:
+                                positions[neuron_id] = {
+                                    "x": float(parts[1]),
+                                    "y": float(parts[2]),
+                                    "z": float(parts[3])
+                                }
+                            except ValueError:
+                                pass
+    except ImportError:
+        pass
+    
     nodes = []
     for nid in neuron_ids:
-        nodes.append({
+        node = {
             "id": nid,
             "name": nid,
             "type": "neuron"
-        })
+        }
+        # Add position if available
+        if nid in positions:
+            node["position"] = positions[nid]
+        nodes.append(node)
 
     # Create Edges
     edges = []
