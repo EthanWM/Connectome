@@ -236,6 +236,16 @@ export class VisualizationEngine {
         }
     }
 
+    /**
+     * Set callback for when a neuron is focused/unfocused
+     */
+    public setOnFocus(callback: (neuronId: string | null) => void): void {
+        this.cameraController.setOnFocus((neuronId) => {
+            this.onNeuronFocus(neuronId);
+            callback(neuronId);
+        });
+    }
+
     public getNeuronMesh(id: string): THREE.Mesh | undefined {
         return this.neuronMeshes.get(id);
     }

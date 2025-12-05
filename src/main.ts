@@ -3,13 +3,18 @@ import { ConnectomeParser } from "./core/data/ConnectomeParser";
 import { SimulationEngine } from "./core/simulation/SimulationEngine";
 import { Neuron } from "./core/simulation/Neuron";
 import { VisualizationEngine, NeuronPosition } from "./core/visualization/VisualizationEngine";
+import { InfoBox } from "./ui/InfoBox";
+import { SimulationControls } from "./ui/SimulationControls";
 
 console.log('ICDS Initializing...');
 
 let engine: SimulationEngine;
 let visualization: VisualizationEngine;
+let infoBox: InfoBox;
+let simControls: SimulationControls;
 let lastTime = 0;
 let isRunning = true;
+let simulationSpeed = 1;
 
 /**
  * Extract positions from neurons, normalize and scale for visualization
@@ -73,6 +78,46 @@ async function initialize(): Promise<void> {
     
     visualization.initializeFromEngine(engine);
     
+    // Initialize UI components
+    const infoBoxEl = document.getElementById('info-box');
+    const controlsEl = document.getElementById('controls');
+    
+    if (infoBoxEl) {
+        infoBox = new InfoBox(infoBoxEl);
+        
+        // Wire up focus callback to show info box
+        visualization.setOnFocus((neuronId) => {
+            if (neuronId) {
+                const neuron = engine.getNeuron(neuronId);
+                if (neuron) {
+                    infoBox.show(neuron);
+                }
+            } else {
+                infoBox.hide();
+            }
+        });
+    }
+    
+    if (controlsEl) {
+        simControls = new SimulationControls(controlsEl, {
+            onPlay: () => { isRunning = true; },
+            onPause: () => { isRunning = false; },
+            onStep: () => {
+                engine.step(0.016); // ~60fps step
+                visualization.updateFromEngine(engine);
+                simControls.incrementStep();
+                infoBox?.update();
+            },
+            onReset: () => {
+                // Reload the simulation
+                initialize();
+            },
+            onSpeedChange: (speed) => {
+                simulationSpeed = speed;
+            }
+        });
+    }
+    
     // Stimulate a neuron to see activity
     const neurons = engine.getAllNeurons();
     if (neurons.length > 0) {
@@ -85,12 +130,14 @@ async function initialize(): Promise<void> {
 }
 
 function animate(currentTime: number): void {
-    const dt = Math.min((currentTime - lastTime) / 1000, 0.1); // Cap dt to prevent large jumps
+    const dt = Math.min((currentTime - lastTime) / 1000, 0.1) * simulationSpeed;
     lastTime = currentTime;
     
     if (isRunning && dt > 0) {
         engine.step(dt);
         visualization.updateFromEngine(engine);
+        simControls?.incrementStep();
+        infoBox?.update();
     }
     
     visualization.render();
