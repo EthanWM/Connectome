@@ -17,11 +17,12 @@ export class InfoBox {
         this.container = container;
         this.callbacks = callbacks;
         this.setupUI();
+        this.bindEvents();
     }
     // Just creating the HTML dynamically instead of web components for now, see ActivityGraph for rationale.
     private setupUI(): void {
         this.container.className = `
-            absolute top-4 right-4 w-64
+            absolute top-4 right-4 w-68
             rounded-lg bg-slate-900/90 backdrop-blur-sm
             border border-slate-700/50
             text-sm text-gray-200
@@ -65,11 +66,15 @@ export class InfoBox {
                         ✕ Lesion
                     </button>
                 </div>
-            </div>
-            <div id="fire-hint" class="absolute top-1/2 -translate-y-1/2 right-full mr-4 flex items-center pointer-events-none opacity-0 transition-opacity duration-300">
-                <div class="bg-slate-900/95 border-2 border-yellow-400 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-lg animate-pulse flex items-center gap-3">
-                    <span>👆 Try clicking <span class="text-orange-400 font-bold">Fire</span> to stimulate a neuron!</span>
-                    <span class="text-yellow-400 text-xl">→</span>
+                <div id="fire-hint" class="mt-3 pt-3 border-t border-slate-700/50 pointer-events-none opacity-0 transition-opacity duration-300">
+                    <div class="bg-slate-800/70 border border-yellow-400 text-white text-xs px-3 py-2 rounded animate-pulse">
+                        <span>👆 Try clicking <span class="text-yellow-300 font-bold">Fire</span> to stimulate a neuron!</span>
+                    </div>
+                </div>
+                <div id="tutorial-hint" class="mt-3 pt-3 border-t border-slate-700/50 pointer-events-none opacity-0 transition-opacity duration-300">
+                    <div class="bg-slate-800/70 border border-blue-400 text-white text-xs px-3 py-2 rounded animate-pulse">
+                        <span>To better see the chain of signals, <span class="text-blue-300 font-bold">pause</span>, then <span class="text-yellow-300 font-bold">fire</span> a neuron, and <span class="text-cyan-300 font-bold">step</span> <svg class="w-3 h-3 inline fill-cyan-300" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg> <span class="text-gray-400 text-xs">(press <span class="font-mono text-cyan-300">.</span>)</span> frame-by-frame!</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -112,7 +117,28 @@ export class InfoBox {
         if (hint) {
             hint.classList.remove('opacity-100');
             hint.classList.add('opacity-0');
-            setTimeout(() => hint.remove(), 300);
+        }
+        // Also hide the tutorial hint once user takes action
+        this.dismissTutorialHint();
+    }
+
+    private showTutorialHint(): void {
+        if (this.hintShown) return;
+        const hint = document.getElementById('tutorial-hint');
+        if (hint) {
+            // Delay slightly so user sees the panel first
+            setTimeout(() => {
+                hint.classList.remove('opacity-0');
+                hint.classList.add('opacity-100');
+            }, 500);
+        }
+    }
+
+    private dismissTutorialHint(): void {
+        const hint = document.getElementById('tutorial-hint');
+        if (hint) {
+            hint.classList.remove('opacity-100');
+            hint.classList.add('opacity-0');
         }
     }
 
@@ -122,6 +148,7 @@ export class InfoBox {
         this.container.classList.add('opacity-100');
         this.update();
         this.showHint();
+        this.showTutorialHint();
     }
 
     public hide(): void {
