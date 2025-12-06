@@ -6,6 +6,7 @@ import { VisualizationEngine, NeuronPosition } from "./core/visualization/Visual
 import { InfoBox } from "./ui/InfoBox";
 import { SimulationControls } from "./ui/SimulationControls";
 import { ActivityGraph } from "./ui/ActivityGraph";
+import { HelpPanel } from "./ui/HelpPanel";
 
 console.log('ICDS Initializing...');
 
@@ -14,6 +15,7 @@ let visualization: VisualizationEngine;
 let infoBox: InfoBox;
 let simControls: SimulationControls;
 let activityGraph: ActivityGraph;
+let helpPanel: HelpPanel;
 let lastTime = 0;
 let isRunning = true;
 
@@ -136,12 +138,25 @@ async function initialize(): Promise<void> {
         });
     }
     
+    const helpPanelEl = document.getElementById('help-panel');
+    if (helpPanelEl) {
+        helpPanel = new HelpPanel(helpPanelEl);
+    }
+    
     // Focus on VA5 neuron at startup
     const va5 = engine.getNeuron('VA5');
     if (va5) {
         visualization.focusOnNeuron('VA5');
         infoBox?.show(va5);
         activityGraph?.show(va5);
+    }
+    
+    // Hide loading screen
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.transition = 'opacity 0.3s ease-out';
+        setTimeout(() => loadingScreen.remove(), 300);
     }
     
     // Start animation loop
