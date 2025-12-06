@@ -7,11 +7,19 @@
     <link rel="stylesheet" href="/assets/styles/main.css">
 </head>
 <body class="bg-slate-950 text-gray-200">
+    <div id="loading-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950">
+        <div class="relative">
+            <div class="w-16 h-16 border-4 border-slate-700 border-t-cyan-400 rounded-full animate-spin"></div>
+        </div>
+        <h1 class="mt-6 text-xl font-semibold text-white">Interactive Connectome Dynamics Simulator</h1>
+        <p class="mt-2 text-sm text-gray-400">Loading neural network...</p>
+    </div>
     <div id="app">
         <canvas id="scene"></canvas>
         <div id="controls"></div>
         <div id="activity-graph"></div>
         <div id="info-box"></div>
+        <div id="help-panel"></div>
     </div>
     <script type="module" src="/src/main.ts"></script>
 </body>
