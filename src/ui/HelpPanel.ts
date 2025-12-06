@@ -63,6 +63,11 @@ export class HelpPanel {
                     </div>
                 </div>
             </div>
+            <div id="tutorial-hint" class="absolute top-1/2 -translate-y-1/2 left-full ml-4 flex items-center pointer-events-none opacity-0 transition-opacity duration-300">
+                <div class="bg-slate-900/95 border-2 border-blue-400 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-lg animate-pulse flex items-center gap-3">
+                    <span>🎬 <span class="text-blue-400 font-bold">Pause</span> → <span class="text-orange-400 font-bold">Fire</span> → <span class="text-cyan-400 font-bold">Step (.)</span> to see signal propagate!</span>
+                </div>
+            </div>
         `;
 
         this.bindEvents();
@@ -72,6 +77,15 @@ export class HelpPanel {
         document.getElementById('btn-toggle-help')?.addEventListener('click', () => {
             this.toggle();
         });
+        
+        // Show tutorial hint after a delay
+        setTimeout(() => {
+            const hint = document.getElementById('tutorial-hint');
+            if (hint) {
+                hint.classList.remove('opacity-0');
+                hint.classList.add('opacity-100');
+            }
+        }, 1500);
     }
 
     public toggle(): void {
