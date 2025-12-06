@@ -7,6 +7,7 @@ import { InfoBox } from "./ui/InfoBox";
 import { SimulationControls } from "./ui/SimulationControls";
 import { GraphManager } from "./ui/GraphManager";
 import { HelpPanel } from "./ui/HelpPanel";
+import { FAQPanel } from "./ui/FAQPanel";
 
 console.log('ICDS Initializing...');
 
@@ -15,6 +16,8 @@ let visualization: VisualizationEngine;
 let infoBox: InfoBox;
 let simControls: SimulationControls;
 let graphManager: GraphManager;
+let helpPanel: HelpPanel;
+let faqPanel: FAQPanel;
 let lastTime = 0;
 let isRunning = true;
 
@@ -131,7 +134,7 @@ async function initialize(): Promise<void> {
                 graphManager?.updateAll();
             },
             onReset: () => {
-                // Reload the simulation
+                // Reload the simulationq
                 initialize();
             }
         });
@@ -139,7 +142,12 @@ async function initialize(): Promise<void> {
     
     const helpPanelEl = document.getElementById('help-panel');
     if (helpPanelEl) {
-        new HelpPanel(helpPanelEl);
+        helpPanel = new HelpPanel(helpPanelEl);
+    }
+    
+    const faqPanelEl = document.getElementById('faq-panel');
+    if (faqPanelEl) {
+        faqPanel = new FAQPanel(faqPanelEl);
     }
     
     // Focus on VA5 neuron at startup
