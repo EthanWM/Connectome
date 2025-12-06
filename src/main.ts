@@ -5,7 +5,7 @@ import { Neuron } from "./core/simulation/Neuron";
 import { VisualizationEngine, NeuronPosition } from "./core/visualization/VisualizationEngine";
 import { InfoBox } from "./ui/InfoBox";
 import { SimulationControls } from "./ui/SimulationControls";
-import { ActivityGraph } from "./ui/ActivityGraph";
+import { GraphManager } from "./ui/GraphManager";
 import { HelpPanel } from "./ui/HelpPanel";
 
 console.log('ICDS Initializing...');
@@ -14,7 +14,7 @@ let engine: SimulationEngine;
 let visualization: VisualizationEngine;
 let infoBox: InfoBox;
 let simControls: SimulationControls;
-let activityGraph: ActivityGraph;
+let graphManager: GraphManager;
 let lastTime = 0;
 let isRunning = true;
 
@@ -83,10 +83,10 @@ async function initialize(): Promise<void> {
     // Initialize UI components
     const infoBoxEl = document.getElementById('info-box');
     const controlsEl = document.getElementById('controls');
-    const activityGraphEl = document.getElementById('activity-graph');
+    const graphContainerEl = document.getElementById('activity-graph');
     
-    if (activityGraphEl) {
-        activityGraph = new ActivityGraph(activityGraphEl);
+    if (graphContainerEl) {
+        graphManager = new GraphManager(graphContainerEl);
     }
     
     if (infoBoxEl) {
@@ -110,11 +110,11 @@ async function initialize(): Promise<void> {
                 const neuron = engine.getNeuron(neuronId);
                 if (neuron) {
                     infoBox.show(neuron);
-                    activityGraph?.show(neuron);
+                    graphManager?.setFocus(neuron);
                 }
             } else {
                 infoBox.hide();
-                activityGraph?.hide();
+                graphManager?.clearFocus();
             }
         });
     }
@@ -128,7 +128,7 @@ async function initialize(): Promise<void> {
                 visualization.updateFromEngine(engine);
                 simControls.incrementStep();
                 infoBox?.update();
-                activityGraph?.update();
+                graphManager?.updateAll();
             },
             onReset: () => {
                 // Reload the simulation
@@ -147,7 +147,7 @@ async function initialize(): Promise<void> {
     if (va5) {
         visualization.focusOnNeuron('VA5');
         infoBox?.show(va5);
-        activityGraph?.show(va5);
+        graphManager?.setFocus(va5);
     }
     
     // Hide loading screen
@@ -171,7 +171,7 @@ function animate(currentTime: number): void {
         visualization.updateFromEngine(engine);
         simControls?.incrementStep();
         infoBox?.update();
-        activityGraph?.update();
+        graphManager?.updateAll();
     }
     
     visualization.render();

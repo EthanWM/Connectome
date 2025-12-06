@@ -24,6 +24,13 @@ interface DataSeries {
     data: number[];
 }
 
+export interface ActivityGraphCallbacks {
+    onPin?: (graph: ActivityGraph) => void;
+    onClose?: (graph: ActivityGraph) => void;
+}
+
+let graphInstanceCounter = 0;
+
 export class ActivityGraph {
     private container: HTMLElement;
     private canvas: HTMLCanvasElement;
@@ -32,13 +39,31 @@ export class ActivityGraph {
     private thresholdValue: number = 1;
     private maxPoints: number = 200;
     private currentNeuron: Neuron | null = null;
+    private isPinned: boolean = false;
+    private callbacks: ActivityGraphCallbacks;
+    
+    // Scoped element references (no global IDs)
+    private neuronLabelEl: HTMLElement | null = null;
+    private yAxisEl: HTMLElement | null = null;
+    private pinBtn: HTMLButtonElement | null = null;
+    private closeBtn: HTMLButtonElement | null = null;
+    
+    public readonly instanceId: number;
 
-    constructor(container: HTMLElement) {
+    constructor(container: HTMLElement, callbacks: ActivityGraphCallbacks = {}) {
+        this.instanceId = ++graphInstanceCounter;
         this.container = container;
+        this.callbacks = callbacks;
         this.setupUI();
         
         this.canvas = container.querySelector('canvas')!;
         this.ctx = this.canvas.getContext('2d')!;
+        
+        // Cache element references (scoped to container)
+        this.neuronLabelEl = container.querySelector('[data-graph-neuron]');
+        this.yAxisEl = container.querySelector('[data-y-axis]');
+        this.pinBtn = container.querySelector('[data-btn-pin]');
+        this.closeBtn = container.querySelector('[data-btn-close]');
         
         this.series = {
             label: 'Voltage',
@@ -47,6 +72,19 @@ export class ActivityGraph {
         };
 
         this.setupResizeObserver();
+        this.bindEvents();
+    }
+    
+    private bindEvents(): void {
+        this.pinBtn?.addEventListener('click', () => {
+            if (!this.isPinned) {
+                this.callbacks.onPin?.(this);
+            }
+        });
+        
+        this.closeBtn?.addEventListener('click', () => {
+            this.callbacks.onClose?.(this);
+        });
     }
 
     private setupUI(): void {
@@ -62,11 +100,23 @@ export class ActivityGraph {
         this.container.innerHTML = `
             <div class="p-3">
                 <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-bold text-white text-xs" id="graph-title">Voltage</h4>
-                    <span class="text-xs text-gray-400" id="graph-neuron">—</span>
+                    <h4 class="font-bold text-white text-xs" data-graph-title>Voltage</h4>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400" data-graph-neuron>—</span>
+                        <button data-btn-pin class="text-gray-400 hover:text-cyan-400 transition-colors" title="Pin this graph">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                            </svg>
+                        </button>
+                        <button data-btn-close class="text-gray-400 hover:text-red-400 transition-colors hidden" title="Close graph">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex gap-1">
-                    <div id="y-axis" class="flex flex-col justify-between text-xs text-gray-500 w-8 text-right pr-1"></div>
+                    <div data-y-axis class="flex flex-col justify-between text-xs text-gray-500 w-8 text-right pr-1"></div>
                     <canvas class="flex-1 h-24 rounded bg-slate-800/50"></canvas>
                 </div>
                 <div class="flex justify-between text-xs text-gray-500 mt-1">
@@ -101,8 +151,7 @@ export class ActivityGraph {
         this.thresholdValue = neuron.threshold;
         this.series.data = []; // Reset data for new neuron
         
-        const neuronLabel = document.getElementById('graph-neuron');
-        if (neuronLabel) neuronLabel.textContent = neuron.name;
+        if (this.neuronLabelEl) this.neuronLabelEl.textContent = neuron.name;
         
         this.container.classList.remove('opacity-0', 'pointer-events-none');
         this.container.classList.add('opacity-100');
@@ -112,6 +161,38 @@ export class ActivityGraph {
         this.currentNeuron = null;
         this.container.classList.remove('opacity-100');
         this.container.classList.add('opacity-0', 'pointer-events-none');
+    }
+    
+    /**
+     * Mark this graph as pinned (persistent, shows close button)
+     */
+    public pin(): void {
+        this.isPinned = true;
+        this.pinBtn?.classList.add('hidden');
+        this.closeBtn?.classList.remove('hidden');
+        // Add visual indicator for pinned state
+        this.container.classList.add('border-cyan-500/50');
+    }
+    
+    /**
+     * Get the neuron ID this graph is tracking
+     */
+    public getNeuronId(): string | null {
+        return this.currentNeuron?.id ?? null;
+    }
+    
+    /**
+     * Check if this graph is pinned
+     */
+    public getIsPinned(): boolean {
+        return this.isPinned;
+    }
+    
+    /**
+     * Remove this graph from the DOM
+     */
+    public destroy(): void {
+        this.container.remove();
     }
 
     public update(): void {
@@ -128,14 +209,13 @@ export class ActivityGraph {
     }
 
     private updateYAxis(minVal: number, maxVal: number): void {
-        const yAxisEl = document.getElementById('y-axis');
-        if (!yAxisEl) return;
+        if (!this.yAxisEl) return;
 
         // Show 3 tick marks: min, middle, max
         const midVal = (minVal + maxVal) / 2;
         const ticks = [maxVal, midVal, minVal];
 
-        yAxisEl.innerHTML = ticks
+        this.yAxisEl.innerHTML = ticks
             .map(val => `<div>${val.toFixed(1)}</div>`)
             .join('');
     }
