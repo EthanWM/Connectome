@@ -1,4 +1,6 @@
 # (WIP) Interactive Connectome Dynamics Simulator (ICDS)
+Live demo:
+https://ethanwm.github.io/Connectome/
 
 An interactive, web-based 3D visualization tool for simulating and displaying real-time neural activity on connectomes.
 
