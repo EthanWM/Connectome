@@ -50,6 +50,14 @@ export class HelpPanel {
                         <span class="text-cyan-400 font-mono w-24 shrink-0">Escape</span>
                         <span class="text-gray-300">Deselect neuron</span>
                     </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-cyan-400 font-mono w-24 shrink-0">Space</span>
+                        <span class="text-gray-300">Play/pause simulation</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-cyan-400 font-mono w-24 shrink-0">.</span>
+                        <span class="text-gray-300">Step forward (when paused)</span>
+                    </div>
                     <div class="border-t border-slate-700/50 my-2 pt-2">
                         <p class="text-gray-400">Use the info panel to <span class="text-orange-400">Fire</span> or <span class="text-red-400">Lesion</span> selected neurons.</p>
                     </div>
