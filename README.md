@@ -2,6 +2,17 @@
 
 An interactive, web-based 3D visualization tool for simulating and displaying real-time neural activity on connectomes.
 
+## Background
+
+### The Worm of the Hour:
+https://en.wikipedia.org/wiki/Caenorhabditis_elegans
+
+### Connectomes:
+https://en.wikipedia.org/wiki/Connectome
+
+### Leaky Integrate and Fire:
+https://neuronaldynamics.epfl.ch/online/Ch1.S3.html
+
 ## Project Structure
 
 ```
