@@ -2,8 +2,20 @@
 
 import type { SynapseConnection, SynapseType } from './types';
 
+export interface NeuronPosition {
+    x: number;
+    y: number;
+    z: number;
+}
+
 export class Neuron {
+    // Identity
     public id: string;
+    public name: string;
+    public type?: string;
+    public position?: NeuronPosition;
+
+    // Simulation state
     public voltage: number;
     public threshold: number;
     public restingPotential: number;
@@ -14,8 +26,12 @@ export class Neuron {
     public refractoryPeriod: number;
     public isLesioned: boolean;
 
-    constructor(id: string) {
+    constructor(id: string, name?: string) {
+        // Identity
         this.id = id;
+        this.name = name ?? id;
+        
+        // Simulation state
         this.voltage = 0;
         this.threshold = 0;
         this.restingPotential = 0;
@@ -28,9 +44,25 @@ export class Neuron {
     }
 
     public update(dt: number): void {
+        // Lesioned neurons do not update
+        if (this.isLesioned) {
+            return;
+        }
+        
+        // Decrement refractory timer based on elapsed time
+        if (this.refractoryTimer > 0) {
+            this.refractoryTimer -= dt;
+            // During refractory period, ignore incoming current and just leak toward resting
+            const leak = -(this.voltage - this.restingPotential);
+            this.voltage += leak / this.timeConstant;
+            this.incomingCurrent = 0;
+            return;
+        }
+
         // Check threshold first (spike initiation is instantaneous)
-        if (this.voltage >= this.threshold && this.refractoryTimer <= 0) {
+        if (this.voltage >= this.threshold) {
             this.fire();
+            return;
         }
 
         // deltaV = 1/tau[RI(t)-leak]dt
@@ -51,9 +83,16 @@ export class Neuron {
     }
 
     public fire(): void {
-        this.voltage = this.restingPotential;
+        // Lesioned neurons cannot fire
+        if (this.isLesioned) {
+            return;
+        }
+        
+        // Set voltage to threshold momentarily (for visualization/graph)
+        this.voltage = this.threshold;
         this.refractoryTimer = this.refractoryPeriod;
         // Propagate to connected neurons
+        console.log(`${this.name} fired! Propagating to ${this.outputConnections.length} connections`);
         this.outputConnections.forEach((connection) => {
             connection.target.stimulate(connection.weight);
         });

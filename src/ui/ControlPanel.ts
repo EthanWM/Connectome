@@ -4,10 +4,8 @@ export type InteractionMode = 'stimulate' | 'lesion';
 
 export class ControlPanel {
     private mode: InteractionMode;
-    private container: HTMLElement;
 
-    constructor(container: HTMLElement) {
-        this.container = container;
+    constructor(_container: HTMLElement) {
         this.mode = 'stimulate';
         // TODO: Create UI elements
     }
@@ -21,7 +19,7 @@ export class ControlPanel {
         // TODO: Update UI to reflect mode change
     }
 
-    public updateInfoBox(neuronId: string | null): void {
+    public updateInfoBox(_neuronId: string | null): void {
         // TODO: Display neuron info or hide if null
     }
 }

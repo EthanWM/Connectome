@@ -16,9 +16,18 @@ describe('ConnectomeParser', () => {
         ]
     };
 
-    describe('parseConnectome', () => {
+    const mockDataWithPositions: ConnectomeData = {
+        nodes: [
+            { id: 'N1', name: 'Neuron 1', position: { x: 0, y: 0, z: 0 } },
+            { id: 'N2', name: 'Neuron 2', position: { x: 1, y: 1, z: 1 } },
+            { id: 'N3', name: 'Neuron 3', position: { x: 2, y: 2, z: 2 } }
+        ],
+        edges: []
+    };
+
+    describe('createEngine', () => {
         it('should correctly parse nodes into neurons', () => {
-            const engine = ConnectomeParser.parseConnectome(mockData);
+            const engine = ConnectomeParser.createEngine(mockData);
             const neurons = engine.getAllNeurons();
 
             expect(neurons).toHaveLength(3);
@@ -28,7 +37,7 @@ describe('ConnectomeParser', () => {
         });
 
         it('should correctly create connections between neurons', () => {
-            const engine = ConnectomeParser.parseConnectome(mockData);
+            const engine = ConnectomeParser.createEngine(mockData);
             
             const n1 = engine.getNeuron('N1');
             const n2 = engine.getNeuron('N2');
@@ -57,14 +66,30 @@ describe('ConnectomeParser', () => {
                 edges: [{ source: 'N1', target: 'MISSING', weight: 1.0 }]
             };
 
-            const engine = ConnectomeParser.parseConnectome(badData);
+            const engine = ConnectomeParser.createEngine(badData);
             const n1 = engine.getNeuron('N1');
 
             expect(n1?.outputConnections).toHaveLength(0);
         });
+
+        it('should store node data including positions on neurons', () => {
+            const engine = ConnectomeParser.createEngine(mockDataWithPositions);
+            
+            const neurons = engine.getAllNeurons();
+            expect(neurons).toHaveLength(3);
+            
+            const n1 = engine.getNeuron('N1');
+            expect(n1).toBeDefined();
+            expect(n1?.name).toBe('Neuron 1');
+            expect(n1?.position).toEqual({ x: 0, y: 0, z: 0 });
+            
+            const n2 = engine.getNeuron('N2');
+            expect(n2?.name).toBe('Neuron 2');
+            expect(n2?.position).toEqual({ x: 1, y: 1, z: 1 });
+        });
     });
 
-    describe('loadFromFile', () => {
+    describe('loadData', () => {
         // Mock global fetch
         const originalFetch = globalThis.fetch;
 
@@ -76,22 +101,23 @@ describe('ConnectomeParser', () => {
             globalThis.fetch = originalFetch;
         });
 
-        it('should fetch data and parse it', async () => {
+        it('should fetch and return raw connectome data', async () => {
             const mockResponse = {
                 json: async () => mockData
             };
             (globalThis.fetch as any).mockResolvedValue(mockResponse);
 
-            const engine = await ConnectomeParser.loadFromFile('test.json');
+            const data = await ConnectomeParser.loadData('test.json');
 
             expect(globalThis.fetch).toHaveBeenCalledWith('test.json');
-            expect(engine.getAllNeurons()).toHaveLength(3);
+            expect(data.nodes).toHaveLength(3);
+            expect(data.edges).toHaveLength(2);
         });
 
         it('should throw an error if fetch fails', async () => {
             (globalThis.fetch as any).mockRejectedValue(new Error('Network error'));
 
-            await expect(ConnectomeParser.loadFromFile('test.json'))
+            await expect(ConnectomeParser.loadData('test.json'))
                 .rejects
                 .toThrow('Failed to load connectome file: Error: Network error');
         });
