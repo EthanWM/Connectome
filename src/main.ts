@@ -140,7 +140,7 @@ async function initialize(): Promise<void> {
     
     const helpPanelEl = document.getElementById('help-panel');
     if (helpPanelEl) {
-        helpPanel = new HelpPanel(helpPanelEl);
+        new HelpPanel(helpPanelEl);
     }
     
     // Focus on VA5 neuron at startup
