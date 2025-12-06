@@ -16,7 +16,6 @@ let simControls: SimulationControls;
 let activityGraph: ActivityGraph;
 let lastTime = 0;
 let isRunning = true;
-let simulationSpeed = 1;
 
 /**
  * Extract positions from neurons, normalize and scale for visualization
@@ -133,9 +132,6 @@ async function initialize(): Promise<void> {
             onReset: () => {
                 // Reload the simulation
                 initialize();
-            },
-            onSpeedChange: (speed) => {
-                simulationSpeed = speed;
             }
         });
     }
@@ -153,7 +149,6 @@ async function initialize(): Promise<void> {
 }
 
 function animate(currentTime: number): void {
-    // Use fixed dt for now - speed control needs more sophisticated implementation
     const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
     lastTime = currentTime;
     

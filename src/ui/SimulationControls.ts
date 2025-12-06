@@ -5,7 +5,6 @@ export interface SimulationControlsCallbacks {
     onPause: () => void;
     onStep: () => void;
     onReset: () => void;
-    onSpeedChange: (speed: number) => void;
 }
 
 export class SimulationControls {
