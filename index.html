@@ -4,15 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Connectome Dynamics Simulator</title>
-  <script type="module" crossorigin src="/Connectome/assets/index-kn9gv7Ju.js"></script>
-  <link rel="stylesheet" crossorigin href="/Connectome/assets/index-BbQqwpQf.css">
+  <script type="module" crossorigin src="/Connectome/assets/index-CX5jDjNi.js"></script>
+  <link rel="stylesheet" crossorigin href="/Connectome/assets/index-DIXeR9o6.css">
 </head>
 <body class="bg-slate-950 text-gray-200">
+    <div id="loading-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950">
+        <div class="relative">
+            <div class="w-16 h-16 border-4 border-slate-700 border-t-cyan-400 rounded-full animate-spin"></div>
+        </div>
+        <h1 class="mt-6 text-xl font-semibold text-white">Interactive Connectome Dynamics Simulator</h1>
+        <p class="mt-2 text-sm text-gray-400">Loading neural network...</p>
+    </div>
     <div id="app">
         <canvas id="scene"></canvas>
         <div id="controls"></div>
         <div id="activity-graph"></div>
         <div id="info-box"></div>
+        <div id="help-panel"></div>
     </div>
 </body>
 </html>
