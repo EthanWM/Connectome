@@ -17,6 +17,7 @@ export class SimulationControls {
         this.container = container;
         this.callbacks = callbacks;
         this.setupUI();
+        this.setupKeyboardShortcuts();
     }
     // Just creating the HTML dynamically instead of web components for now, see ActivityGraph for rationale.
     private setupUI(): void {
@@ -121,5 +122,32 @@ export class SimulationControls {
     public setPlaying(playing: boolean): void {
         this.isPlaying = playing;
         this.updatePlayPauseState();
+    }
+
+    private setupKeyboardShortcuts(): void {
+        window.addEventListener('keydown', (event) => {
+            // Ignore if user is typing in an input field
+            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+                return;
+            }
+
+            switch (event.code) {
+                case 'Space':
+                    event.preventDefault();
+                    this.isPlaying = !this.isPlaying;
+                    this.updatePlayPauseState();
+                    if (this.isPlaying) {
+                        this.callbacks.onPlay();
+                    } else {
+                        this.callbacks.onPause();
+                    }
+                    break;
+                case 'Period': // '.' for step forward
+                    if (!this.isPlaying) {
+                        this.callbacks.onStep();
+                    }
+                    break;
+            }
+        });
     }
 }

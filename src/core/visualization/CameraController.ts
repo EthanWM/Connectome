@@ -44,6 +44,9 @@ export class CameraController {
         // Double-click to focus on a neuron
         domElement.addEventListener('dblclick', (event) => this.onDoubleClick(event, domElement));
         
+        // Escape to deselect/unfocus neuron
+        window.addEventListener('keydown', (event) => this.onKeyDown(event));
+        
         // Hide focus indicator when user pans manually (not during animation)
         this.controls.addEventListener('change', () => {
             if (this.focusIndicator.visible && !this.isAnimating) {
@@ -100,6 +103,22 @@ export class CameraController {
             if (this.onFocusCallback) {
                 this.onFocusCallback(neuronId);
             }
+        }
+    }
+
+    private onKeyDown(event: KeyboardEvent): void {
+        if (event.key === 'Escape' && this.focusIndicator.visible) {
+            this.clearFocus();
+        }
+    }
+
+    /**
+     * Clear the current focus/selection
+     */
+    public clearFocus(): void {
+        this.focusIndicator.visible = false;
+        if (this.onFocusCallback) {
+            this.onFocusCallback(null);
         }
     }
 
