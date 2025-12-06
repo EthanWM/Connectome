@@ -11,6 +11,7 @@ export class InfoBox {
     private container: HTMLElement;
     private currentNeuron: Neuron | null = null;
     private callbacks: InfoBoxCallbacks;
+    private hintShown: boolean = false;
 
     constructor(container: HTMLElement, callbacks: InfoBoxCallbacks = {}) {
         this.container = container;
@@ -65,6 +66,12 @@ export class InfoBox {
                     </button>
                 </div>
             </div>
+            <div id="fire-hint" class="absolute top-1/2 -translate-y-1/2 right-full mr-4 flex items-center pointer-events-none opacity-0 transition-opacity duration-300">
+                <div class="bg-slate-900/95 border-2 border-yellow-400 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-lg animate-pulse flex items-center gap-3">
+                    <span>👆 Try clicking <span class="text-orange-400 font-bold">Fire</span> to stimulate a neuron!</span>
+                    <span class="text-yellow-400 text-xl">→</span>
+                </div>
+            </div>
         `;
 
         this.bindEvents();
@@ -73,16 +80,40 @@ export class InfoBox {
     private bindEvents(): void {
         document.getElementById('btn-fire-neuron')?.addEventListener('click', () => {
             if (this.currentNeuron && !this.currentNeuron.isLesioned) {
+                this.dismissHint();
                 this.callbacks.onFire?.(this.currentNeuron);
             }
         });
 
         document.getElementById('btn-lesion-neuron')?.addEventListener('click', () => {
             if (this.currentNeuron && !this.currentNeuron.isLesioned) {
+                this.dismissHint();
                 this.callbacks.onLesion?.(this.currentNeuron);
                 this.update();  // Update state display
             }
         });
+    }
+
+    private showHint(): void {
+        if (this.hintShown) return;
+        const hint = document.getElementById('fire-hint');
+        if (hint) {
+            // Delay slightly so user sees the panel first
+            setTimeout(() => {
+                hint.classList.remove('opacity-0');
+                hint.classList.add('opacity-100');
+            }, 500);
+        }
+    }
+
+    private dismissHint(): void {
+        this.hintShown = true;
+        const hint = document.getElementById('fire-hint');
+        if (hint) {
+            hint.classList.remove('opacity-100');
+            hint.classList.add('opacity-0');
+            setTimeout(() => hint.remove(), 300);
+        }
     }
 
     public show(neuron: Neuron): void {
@@ -90,6 +121,7 @@ export class InfoBox {
         this.container.classList.remove('opacity-0', 'pointer-events-none');
         this.container.classList.add('opacity-100');
         this.update();
+        this.showHint();
     }
 
     public hide(): void {
