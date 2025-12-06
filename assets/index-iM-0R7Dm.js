@@ -4260,7 +4260,7 @@ void main() {
                     
                     <div>
                         <h5 class="font-semibold text-cyan-400 mb-1">What are those yellow dots?</h5>
-                        <p class="text-gray-300">Yellow dots represent <span class="text-yellow-400 font-semibold">neurons</span>, which the cyan edges represent <span class="text-cyan-400 font-semibold">synapses</span>—connections between neurons where signals are transmitted.</p>
+                        <p class="text-gray-300">Yellow dots represent <span class="text-yellow-400 font-semibold">neurons</span>, and the cyan edges represent <span class="text-cyan-400 font-semibold">synapses</span>—connections between neurons where signals are transmitted.</p>
                     </div>
                     
                     <div>
