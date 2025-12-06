@@ -16,8 +16,6 @@ let visualization: VisualizationEngine;
 let infoBox: InfoBox;
 let simControls: SimulationControls;
 let graphManager: GraphManager;
-let helpPanel: HelpPanel;
-let faqPanel: FAQPanel;
 let lastTime = 0;
 let isRunning = true;
 
@@ -142,12 +140,12 @@ async function initialize(): Promise<void> {
     
     const helpPanelEl = document.getElementById('help-panel');
     if (helpPanelEl) {
-        helpPanel = new HelpPanel(helpPanelEl);
+        new HelpPanel(helpPanelEl);
     }
     
     const faqPanelEl = document.getElementById('faq-panel');
     if (faqPanelEl) {
-        faqPanel = new FAQPanel(faqPanelEl);
+        new FAQPanel(faqPanelEl);
     }
     
     // Focus on VA5 neuron at startup
